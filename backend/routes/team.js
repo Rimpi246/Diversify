@@ -5,12 +5,20 @@ const {
 	deleteTeam,
 	createTeam,
 	getDeptsByTeam,
+	addMembers,
+	removeMember,
 } = require("../controllers/team")
+const { authenticate } = require("../middleware/auth")
 
 const router = express.Router()
 
-router.route("/:id").get(getTeamById).put(updateTeam).delete(deleteTeam)
-router.route("/").post(createTeam)
-router.route("/:id/depts").get(getDeptsByTeam)
+router
+	.route("/:id")
+	.get(authenticate, getTeamById)
+	.put(authenticate, updateTeam)
+	.delete(authenticate, deleteTeam)
+router.route("/").post(authenticate, createTeam)
+router.route("/:id/depts").get(authenticate, getDeptsByTeam)
+router.route("/:id/add-member").post(authenticate, addMembers)
 
 module.exports = router

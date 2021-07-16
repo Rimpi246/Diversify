@@ -1,5 +1,7 @@
+const User = require("../models/User")
 const Team = require("../models/Team")
 const Department = require("../models/Department")
+const asyncHandler = require("express-async-handler")
 
 const getTeamById = async (req, res) => {
 	try {
@@ -16,9 +18,11 @@ const getTeamById = async (req, res) => {
 
 const createTeam = async (req, res) => {
 	try {
+		const user = await User.findById(req.user._id)
 		const { name } = req.body
 		const newTeam = new Team({
 			name,
+			admin: user,
 		})
 		await newTeam.save()
 		return res.status(200).json(newTeam)
@@ -27,9 +31,33 @@ const createTeam = async (req, res) => {
 	}
 }
 
+const addMembers = asyncHandler(async (req, res) => {
+	const user = await User.findById(req.user._id)
+	const { member, role } = req.body
+	const teamId = req.params.id
+	const team = await Team.findById(teamId)
+
+	if (team.admin.toString() !== user._id.toString()) {
+		return res.status(401).json("Unauthorised")
+	}
+	const checkIfMember = team.members.filter((m) => m.id === member)
+	if (checkIfMember.length > 0) {
+		res.status(400)
+		throw new Error("Member already added")
+	} else {
+		team.members.unshift({ id: member, role: role })
+		await team.save()
+		return res.json(team)
+	}
+})
+
 const updateTeam = async (req, res) => {
 	try {
 		const team = await Team.findById(req.params.id)
+
+		if (team.admin.toString() !== user._id.toString()) {
+			return res.status(401).json("Unauthorised")
+		}
 		if (!team) {
 			return res.status(400).json("Team not found")
 		}
@@ -64,4 +92,11 @@ const getDeptsByTeam = async (req, res) => {
 	}
 }
 
-module.exports = { getTeamById, createTeam, updateTeam, deleteTeam, getDeptsByTeam }
+module.exports = {
+	getTeamById,
+	createTeam,
+	updateTeam,
+	deleteTeam,
+	getDeptsByTeam,
+	addMembers,
+}

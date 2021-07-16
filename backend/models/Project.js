@@ -4,6 +4,7 @@ const projectSchema = mongoose.Schema({
 	head: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "users",
+		required: true,
 	},
 	name: {
 		type: String,
