@@ -17,22 +17,24 @@ const login = async (req, res) => {
 			return res.status(401).json("Invalid email or password")
 		}
 	} catch (err) {
+		console.log(err)
 		return res.status(400).json(err)
 	}
 }
 
 const register = async (req, res) => {
 	try {
-		const { email, password, name } = req.body
+		const { email, password, name, gender } = req.body
 		const userExists = await User.findOne({ email })
+
 		if (userExists) {
-			res.status(400)
-			throw new Error("User already exists")
+			return res.status(404).json("Email is already in use")
 		}
 		const user = await User.create({
 			name,
 			email,
 			password,
+			gender,
 		})
 		if (user) {
 			return res.status(200).json({
@@ -40,10 +42,11 @@ const register = async (req, res) => {
 				name: user.name,
 				email: user.email,
 				isAdmin: user.isAdmin,
+				gender: user.gender,
 				token: jwt.sign({ id: user._id }, process.env.JWT_SECRETKEY, { expiresIn: "30d" }),
 			})
 		} else {
-			return res.status(404).json("User not found")
+			return res.status(404).json("Error while creating user")
 		}
 	} catch (err) {
 		return res.status(400).json(err)
