@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 const User = require("../models/User")
+const asyncHandler = require("express-async-handler")
 
 const login = async (req, res) => {
 	try {
@@ -53,4 +54,57 @@ const register = async (req, res) => {
 	}
 }
 
-module.exports = { login, register }
+const getToken = asyncHandler(async (req, res) => {
+	const user = await User.findById(req.user._id)
+	if (!user) {
+		res.status(401)
+		throw new Error("User not authorized")
+	}
+	const { contact } = user
+	client.verify
+		.services(process.env.TWILIO_SERVICE_ID)
+		.verifications.create({
+			to: `+${contact}`,
+			channel: "sms",
+		})
+		.then((data) => {
+			res.status(200).send({
+				message: "Verification is sent!",
+				contact,
+				data,
+			})
+		})
+})
+
+const verify = asyncHandler(async (req, res) => {
+	const user = await User.findById(req.user._id)
+	if (!user) {
+		res.status(401)
+		throw new Error("User not authorized")
+	}
+	const { contact } = user
+	const { code } = req.body
+	if (contact && code) {
+		const data = await client.verify
+			.services(process.env.TWILIO_SERVICE_ID)
+			.verificationChecks.create({
+				to: `+${contact}`,
+				code,
+			})
+		if (data.status === "approved") {
+			user.verified = true
+			await user.save()
+			res.status(200).send({
+				message: "User is Verified!!",
+				data,
+			})
+		}
+	} else {
+		res.status(400).send({
+			message: "Wrong phone number or code",
+			phonenumber: contact,
+		})
+	}
+})
+
+module.exports = { login, register, getToken, verify }

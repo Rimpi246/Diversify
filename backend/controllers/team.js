@@ -35,11 +35,9 @@ const addMembers = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user._id)
 	const { member, role } = req.body
 	const teamId = req.params.id
-	const team = await Team.findById(teamId).populate("admin")
+	const team = await Team.findById(teamId)
 
-	if (team.admin !== user._id) {
-		console.log(team)
-		console.log(user)
+	if (team.admin.toString() !== user._id.toString()) {
 		return res.status(401).json("Unauthorised")
 	}
 	const checkIfMember = team.members.filter((m) => m.id === member)
@@ -56,6 +54,10 @@ const addMembers = asyncHandler(async (req, res) => {
 const updateTeam = async (req, res) => {
 	try {
 		const team = await Team.findById(req.params.id)
+
+		if (team.admin.toString() !== user._id.toString()) {
+			return res.status(401).json("Unauthorised")
+		}
 		if (!team) {
 			return res.status(400).json("Team not found")
 		}
@@ -90,4 +92,11 @@ const getDeptsByTeam = async (req, res) => {
 	}
 }
 
-module.exports = { getTeamById, createTeam, updateTeam, deleteTeam, getDeptsByTeam, addMembers }
+module.exports = {
+	getTeamById,
+	createTeam,
+	updateTeam,
+	deleteTeam,
+	getDeptsByTeam,
+	addMembers,
+}

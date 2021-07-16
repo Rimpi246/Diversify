@@ -6,6 +6,7 @@ const {
 	createTeam,
 	getDeptsByTeam,
 	addMembers,
+	removeMember,
 } = require("../controllers/team")
 const { authenticate } = require("../middleware/auth")
 
