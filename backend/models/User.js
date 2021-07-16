@@ -32,6 +32,10 @@ const userSchema = mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		ethnicity: {
+			type: String,
+			required: true,
+		},
 	},
 	{
 		timestamps: true,
