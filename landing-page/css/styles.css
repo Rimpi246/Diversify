@@ -16,7 +16,9 @@ body{
 }
 .navbar-nav li{
   padding:0 10px;
+  padding-right: 80px;
 }
+
 .navbar-nav li a{
   color:#fff !important;
   font-weight: 600;
@@ -46,15 +48,18 @@ body{
   padding-top: 50px;
 }
 .about-title{
-  font-size: 40px;
+  font-size: 50px;
   font-weight: 600;
   margin-top: 8%;
 }
 #about-us ul li{
   margin:10px 0;
 }
-#about-us ul{
+.about-us ul{
   margin-left: 20px;
+  font-size: 25px;
+  padding-left: 80px;
+  padding-top: 80px;
 }
 
 /* Team Section */
@@ -81,10 +86,23 @@ body{
   font-weight: 600;
   margin-bottom: 30px;
 }
+
+.social-icons a
+{
+  font-size:36px;
+ display:inline-block;
+ height: 40px;
+ width: 60px;
+ text-align:center ;
+ color:#7b1798;
+}
 .social-icons i{
   width:60px;
   transition:0.5s;
-}
+  border-radius: 50%;
+  border:2px solid violet;
+  }
+
 .social-icons a:hover i{
   transform: translateY(-10px)
 }
