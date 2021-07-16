@@ -6,6 +6,9 @@ const asyncHandler = require("express-async-handler")
 const getTeamById = async (req, res) => {
 	try {
 		const team = await Team.findById(req.params.id)
+		if (team.admin.toString() !== req.user._id.toString()) {
+			return res.status(401).json("Unauthorised")
+		}
 		if (!team) {
 			return res.status(400).json("Team not found")
 		} else {
@@ -54,8 +57,7 @@ const addMembers = asyncHandler(async (req, res) => {
 const updateTeam = async (req, res) => {
 	try {
 		const team = await Team.findById(req.params.id)
-
-		if (team.admin.toString() !== user._id.toString()) {
+		if (team.admin.toString() !== req.user._id.toString()) {
 			return res.status(401).json("Unauthorised")
 		}
 		if (!team) {
@@ -65,6 +67,7 @@ const updateTeam = async (req, res) => {
 		await team.save()
 		return res.status(200).json(team)
 	} catch (err) {
+		console.log(err)
 		return res.status(500).json(err)
 	}
 }
@@ -75,6 +78,9 @@ const deleteTeam = async (req, res) => {
 		if (!team) {
 			return res.status(400).json("Team not found")
 		}
+		if (team.admin.toString() !== req.user._id.toString()) {
+			return res.status(401).json("Unauthorised")
+		}
 		await team.remove()
 		return res.status(200).json("Team deleted")
 	} catch (err) {
@@ -84,6 +90,13 @@ const deleteTeam = async (req, res) => {
 
 const getDeptsByTeam = async (req, res) => {
 	try {
+		const team = await Team.findById(req.params.id)
+		if (!team) {
+			return res.status(400).json("Team not found")
+		}
+		if (team.admin.toString() !== req.user._id.toString()) {
+			return res.status(401).json("Unauthorised")
+		}
 		const depts = await Department.find({ team: req.params.id })
 		res.status(200).json(depts)
 	} catch (err) {

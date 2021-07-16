@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const User = require("../models/User")
 const asyncHandler = require("express-async-handler")
+const client = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
 
 const login = async (req, res) => {
 	try {
@@ -25,7 +26,7 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
 	try {
-		const { email, password, name, gender } = req.body
+		const { email, password, name, gender, contact } = req.body
 		const userExists = await User.findOne({ email })
 
 		if (userExists) {
@@ -36,6 +37,7 @@ const register = async (req, res) => {
 			email,
 			password,
 			gender,
+			contact,
 		})
 		if (user) {
 			return res.status(200).json({
@@ -44,6 +46,7 @@ const register = async (req, res) => {
 				email: user.email,
 				isAdmin: user.isAdmin,
 				gender: user.gender,
+				contact: user.contact,
 				token: jwt.sign({ id: user._id }, process.env.JWT_SECRETKEY, { expiresIn: "30d" }),
 			})
 		} else {
