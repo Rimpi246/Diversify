@@ -4,7 +4,6 @@ const {
 	updateTeam,
 	deleteTeam,
 	createTeam,
-	getDeptsByTeam,
 	addMembers,
 	removeMember,
 } = require("../controllers/team")
@@ -18,7 +17,6 @@ router
 	.put(authenticate, updateTeam)
 	.delete(authenticate, deleteTeam)
 router.route("/").post(authenticate, createTeam)
-router.route("/:id/depts").get(authenticate, getDeptsByTeam)
 router.route("/:id/add-member").post(authenticate, addMembers)
 
 module.exports = router

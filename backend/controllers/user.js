@@ -3,8 +3,7 @@ const User = require("../models/User")
 const asyncHandler = require("express-async-handler")
 const client = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
 
-const login = async (req, res) => {
-	try {
+const login = asyncHandler(async (req, res) => {
 		const { email, password } = req.body
 		const user = await User.findOne({ email })
 		if (user && (await user.matchPassword(password))) {
@@ -16,46 +15,38 @@ const login = async (req, res) => {
 				token: jwt.sign({ id: user._id }, process.env.JWT_SECRETKEY, { expiresIn: "30d" }),
 			})
 		} else {
-			return res.status(401).json("Invalid email or password")
+			throw new Error("Invalid email or password")
 		}
-	} catch (err) {
-		console.log(err)
-		return res.status(400).json(err)
+})
+
+const register = asyncHandler(async (req, res) => {
+	const { email, password, name, gender, contact } = req.body
+	const userExists = await User.findOne({ email })
+
+	if (userExists) {
+		throw new Error("Email is already in use")
 	}
-}
-
-const register = async (req, res) => {
-	try {
-		const { email, password, name, gender, contact } = req.body
-		const userExists = await User.findOne({ email })
-
-		if (userExists) {
-			return res.status(404).json("Email is already in use")
-		}
-		const user = await User.create({
-			name,
-			email,
-			password,
-			gender,
-			contact,
+	const user = await User.create({
+		name,
+		email,
+		password,
+		gender,
+		contact,
+	})
+	if (user) {
+		return res.status(200).json({
+			_id: user._id,
+			name: user.name,
+			email: user.email,
+			isAdmin: user.isAdmin,
+			gender: user.gender,
+			contact: user.contact,
+			token: jwt.sign({ id: user._id }, process.env.JWT_SECRETKEY, { expiresIn: "30d" }),
 		})
-		if (user) {
-			return res.status(200).json({
-				_id: user._id,
-				name: user.name,
-				email: user.email,
-				isAdmin: user.isAdmin,
-				gender: user.gender,
-				contact: user.contact,
-				token: jwt.sign({ id: user._id }, process.env.JWT_SECRETKEY, { expiresIn: "30d" }),
-			})
-		} else {
-			return res.status(404).json("Error while creating user")
-		}
-	} catch (err) {
-		return res.status(400).json(err)
+	} else {
+		throw new Error("Error while creating user")
 	}
-}
+})
 
 const getToken = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user._id)

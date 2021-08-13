@@ -16,9 +16,9 @@ const projectSchema = mongoose.Schema({
 			role: { type: String, required: true },
 		},
 	],
-	dept: {
+	team: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "Department",
+		ref: "Teams",
 		required: true,
 	},
 	status: {
